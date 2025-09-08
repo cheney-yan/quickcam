@@ -21,11 +21,15 @@
 		<button id="buttonProcess" disabled>Process</button>
 	</div>
 	<div id="processing-panel" style="display: none;">
-		<div id="filename-input">
-			<input type="text" id="filename" placeholder="Enter filename..." value="photo">
+		<div id="prompt-input">
+			<textarea id="aiPrompt" placeholder="Describe how you want to enhance this image... (e.g., 'Make the colors more vibrant', 'Add a subtle blur background', 'Improve lighting')" rows="3">Enhance the image quality and make it look more professional</textarea>
+		</div>
+		<div id="loading-status" style="display: none;">
+			<div class="spinner"></div>
+			<p>Processing your image with AI...</p>
 		</div>
 		<div id="process-controls">
-			<button id="touchup">Touch Up</button>
+			<button id="touchup">AI Touch Up</button>
 			<button id="save">Save</button>
 			<button id="cancel">Cancel</button>
 		</div>

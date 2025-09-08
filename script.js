@@ -5,7 +5,8 @@ var processingPanel = document.getElementById("processing-panel");
 var saveButton = document.getElementById("save");
 var touchupButton = document.getElementById("touchup");
 var cancelButton = document.getElementById("cancel");
-var filenameInput = document.getElementById("filename");
+var promptInput = document.getElementById("aiPrompt");
+var loadingStatus = document.getElementById("loading-status");
 var savedImages = document.getElementById("savedImages");
 var canvas = document.getElementById("canvas");
 var video = document.getElementById("video");
@@ -123,101 +124,224 @@ async function startWebcam(deviceId = null) {
         canvas.height = height;
     }
 
-    // Update camera button text with current camera name
-    function updateCameraButtonText() {
-        if (cameras.length > 1 && cameras[currentCameraIndex]) {
-            const currentCamera = cameras[currentCameraIndex];
-            const cameraName = currentCamera.label || `Camera ${currentCameraIndex + 1}`;
-            buttonSwitchCamera.innerHTML = `📷 ${cameraName}`;
-            buttonSwitchCamera.title = `Click to switch between ${cameras.length} cameras. Currently using: ${cameraName}`;
-        }
-    }
+}
 
-    // Camera switching function
-    async function switchCamera() {
-        if (cameras.length <= 1) return;
-        
-        currentCameraIndex = (currentCameraIndex + 1) % cameras.length;
-        await startWebcam(cameras[currentCameraIndex].deviceId);
-        updateCameraButtonText();
-    }
-
-    //add event listener and handle the switch camera button
-    buttonSwitchCamera.addEventListener("mousedown", switchCamera);
-
-    //add event listener and handle the capture button
-    buttonCapture.addEventListener("mousedown", handleButtonCaptureClick);
-
-    function handleButtonCaptureClick() {
-        if(canvas.style.display == "none" || canvas.style.display == ""){
-            canvas.style.display = "block";
-            buttonCapture.innerHTML = "Retake";
-            
-            setHeight();
-            context.drawImage(video, 0, 0, width, height);
-
-            buttonProcess.innerHTML = "Process";
-            buttonProcess.disabled = false;
-        } else {
-            makeCaptureButton();
-        }
-    }
-    
-    function makeCaptureButton() {
-        canvas.style.display = "none";
-        buttonCapture.innerHTML = "Capture";
-        buttonProcess.innerHTML = "Process";
-        buttonProcess.disabled = true;
-        processingPanel.style.display = "none";
-    }
-
-    //add event listener and handle the process button
-    buttonProcess.addEventListener("mousedown", handleButtonProcessClick);
-    
-    function handleButtonProcessClick() {
-        // Show the processing panel
-        processingPanel.style.display = "block";
-        
-        // Set default filename with timestamp
-        const now = new Date();
-        const timestamp = now.toISOString().slice(0, 19).replace(/:/g, '-');
-        filenameInput.value = `photo-${timestamp}`;
-    }
-
-    //add event listener and handle the save button in processing panel
-    saveButton.addEventListener("mousedown", handleSaveClick);
-    
-    function handleSaveClick() {
-        const filename = filenameInput.value.trim() || 'photo';
-        
-        // Convert canvas to blob and trigger download
-        canvas.toBlob(function(blob) {
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${filename}.png`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            // Hide processing panel after save
-            processingPanel.style.display = 'none';
-            makeCaptureButton();
-        }, 'image/png');
-    }
-
-    //add event listener and handle the cancel button
-    cancelButton.addEventListener("mousedown", handleCancelClick);
-    
-    function handleCancelClick() {
-        processingPanel.style.display = "none";
-    }
-
-    //add event listener and handle the touchup button
-    touchupButton.addEventListener("mousedown", handleTouchupClick);
-    
-    function handleTouchupClick() {
-        alert('Touch up functionality would go here (filters, adjustments, etc.)');
+// Update camera button text with current camera name
+function updateCameraButtonText() {
+    if (cameras.length > 1 && cameras[currentCameraIndex]) {
+        const currentCamera = cameras[currentCameraIndex];
+        const cameraName = currentCamera.label || `Camera ${currentCameraIndex + 1}`;
+        buttonSwitchCamera.innerHTML = `📷 ${cameraName}`;
+        buttonSwitchCamera.title = `Click to switch between ${cameras.length} cameras. Currently using: ${cameraName}`;
     }
 }
+
+// Helper function to set video and canvas height
+function setHeight() {
+    var ratio = video.videoWidth / video.videoHeight;
+    height = width/ratio;
+    canvas.style.height = height + "px";
+    canvas.height = height;
+}
+
+// Camera switching function
+async function switchCamera() {
+    if (cameras.length <= 1) return;
+    
+    currentCameraIndex = (currentCameraIndex + 1) % cameras.length;
+    await startWebcam(cameras[currentCameraIndex].deviceId);
+    updateCameraButtonText();
+}
+
+function handleButtonCaptureClick() {
+    if(canvas.style.display == "none" || canvas.style.display == ""){
+        canvas.style.display = "block";
+        buttonCapture.innerHTML = "Retake";
+        
+        setHeight();
+        context.drawImage(video, 0, 0, width, height);
+
+        buttonProcess.innerHTML = "Process";
+        buttonProcess.disabled = false;
+    } else {
+        makeCaptureButton();
+    }
+}
+
+function makeCaptureButton() {
+    canvas.style.display = "none";
+    buttonCapture.innerHTML = "Capture";
+    buttonProcess.innerHTML = "Process";
+    buttonProcess.disabled = true;
+    processingPanel.style.display = "none";
+}
+
+function handleButtonProcessClick() {
+    // Show the processing panel
+    processingPanel.style.display = "block";
+}
+
+function handleSaveClick() {
+    // Generate filename with timestamp
+    const now = new Date();
+    const timestamp = now.toISOString().slice(0, 19).replace(/:/g, '-');
+    const filename = `photo-${timestamp}`;
+    
+    // Convert canvas to blob and trigger download
+    canvas.toBlob(function(blob) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${filename}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        // Hide processing panel after save
+        processingPanel.style.display = 'none';
+        makeCaptureButton();
+    }, 'image/png');
+}
+
+function handleCancelClick() {
+    processingPanel.style.display = "none";
+}
+
+// Gemini AI Image Enhancement Function
+async function enhanceImageWithAI(imageBase64, prompt) {
+    const API_KEY = 'AIzaSyARxNc3dPWqSArIpnwm-8YKgEAc6bHtN70'; // Replace with your actual API key
+    
+    // Construct the request payload
+    const data = JSON.stringify({
+        contents: [
+            {
+                parts: [
+                    {
+                        text: `${prompt}. Please enhance this image and return the improved version.`
+                    },
+                    {
+                        inline_data: {
+                            mime_type: 'image/png',
+                            data: imageBase64
+                        }
+                    }
+                ]
+            }
+        ]
+    });
+
+    try {
+        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-goog-api-key': API_KEY
+            },
+            body: data
+        });
+
+        if (!response.ok) {
+            const errorBody = await response.text();
+            throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorBody}`);
+        }
+
+        const responseJson = await response.json();
+        
+        // Extract the enhanced image from response
+        if (responseJson?.candidates && responseJson.candidates.length > 0) {
+            const candidate = responseJson.candidates[0];
+            if (candidate.content && candidate.content.parts) {
+                for (const part of candidate.content.parts) {
+                    if (part.inline_data && part.inline_data.data) {
+                        return part.inline_data.data;
+                    }
+                }
+            }
+        }
+        
+        console.error('Unexpected API response:', responseJson);
+        throw new Error('No enhanced image found in API response. Check console for details.');
+        
+    } catch (error) {
+        console.error('AI Enhancement Error:', error);
+        throw error;
+    }
+}
+
+// Show/Hide loading state
+function setLoadingState(isLoading) {
+    if (isLoading) {
+        loadingStatus.style.display = 'block';
+        touchupButton.disabled = true;
+        touchupButton.innerHTML = 'Processing...';
+        saveButton.disabled = true;
+        promptInput.disabled = true;
+    } else {
+        loadingStatus.style.display = 'none';
+        touchupButton.disabled = false;
+        touchupButton.innerHTML = 'AI Touch Up';
+        saveButton.disabled = false;
+        promptInput.disabled = false;
+    }
+}
+
+async function handleTouchupClick() {
+    const prompt = promptInput.value.trim();
+    
+    if (!prompt) {
+        alert('Please enter a prompt describing how you want to enhance the image.');
+        return;
+    }
+
+    try {
+        // Show loading state
+        setLoadingState(true);
+        
+        // Get current image data from canvas as base64
+        const imageDataUrl = canvas.toDataURL('image/png');
+        const imageBase64 = imageDataUrl.split(',')[1]; // Remove data:image/png;base64, prefix
+        
+        // Call Gemini API to enhance the image
+        const enhancedImageBase64 = await enhanceImageWithAI(imageBase64, prompt);
+        
+        // Create new image and replace canvas content
+        const enhancedImage = new Image();
+        enhancedImage.onload = function() {
+            // Clear canvas and draw enhanced image
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.drawImage(enhancedImage, 0, 0, canvas.width, canvas.height);
+            
+            // Hide loading state
+            setLoadingState(false);
+            
+            alert('Image enhanced successfully!');
+        };
+        
+        enhancedImage.onerror = function() {
+            setLoadingState(false);
+            alert('Error loading the enhanced image. Please try again.');
+        };
+        
+        // Set the enhanced image source
+        enhancedImage.src = `data:image/png;base64,${enhancedImageBase64}`;
+        
+    } catch (error) {
+        setLoadingState(false);
+        console.error('Enhancement failed:', error);
+        
+        if (error.message.includes('API_KEY')) {
+            alert('Please set up your Gemini API key in the script.js file to use AI enhancement.');
+        } else {
+            alert(`AI enhancement failed: ${error.message}`);
+        }
+    }
+}
+
+// Add event listeners
+buttonSwitchCamera.addEventListener("mousedown", switchCamera);
+buttonCapture.addEventListener("mousedown", handleButtonCaptureClick);
+buttonProcess.addEventListener("mousedown", handleButtonProcessClick);
+saveButton.addEventListener("mousedown", handleSaveClick);
+cancelButton.addEventListener("mousedown", handleCancelClick);
+touchupButton.addEventListener("mousedown", handleTouchupClick);
