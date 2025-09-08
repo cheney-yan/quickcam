@@ -10,6 +10,16 @@ var loadingStatus = document.getElementById("loading-status");
 var savedImages = document.getElementById("savedImages");
 var canvas = document.getElementById("canvas");
 var video = document.getElementById("video");
+var settingsButton = document.getElementById("settingsButton");
+var settingsModal = document.getElementById("settings-modal");
+var saveSettingsButton = document.getElementById("saveSettings");
+var cancelSettingsButton = document.getElementById("cancelSettings");
+var apiKeyInput = document.getElementById("apiKey");
+var apiEndpointInput = document.getElementById("apiEndpoint");
+
+buttonSwitchCamera.disabled = true;
+buttonCapture.disabled = true;
+buttonProcess.disabled = true;
 
 var context;
 var width = 450; //set width of the video and image
@@ -210,7 +220,12 @@ function handleCancelClick() {
 
 // Gemini AI Image Enhancement Function
 async function enhanceImageWithAI(imageBase64, prompt) {
-    const API_KEY = 'AIzaSyARxNc3dPWqSArIpnwm-8YKgEAc6bHtN70'; // Replace with your actual API key
+    const apiKey = localStorage.getItem('apiKey');
+    const apiEndpoint = localStorage.getItem('apiEndpoint') || 'https://generativelanguage.googleapis.com';
+
+    if (!apiKey) {
+        throw new Error('API key is not set. Please configure it in the settings.');
+    }
     
     // Construct the request payload
     const data = JSON.stringify({
@@ -218,7 +233,7 @@ async function enhanceImageWithAI(imageBase64, prompt) {
             {
                 parts: [
                     {
-                        text: `${prompt}. Please enhance this image and return the improved version.`
+                        text: `Make adjustment, ${prompt}. Use original resolution`
                     },
                     {
                         inline_data: {
@@ -232,11 +247,11 @@ async function enhanceImageWithAI(imageBase64, prompt) {
     });
 
     try {
-        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent', {
+        const response = await fetch(`${apiEndpoint}/v1beta/models/gemini-2.5-flash-image-preview:generateContent`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'x-goog-api-key': API_KEY
+                'x-goog-api-key': apiKey
             },
             body: data
         });
@@ -337,8 +352,27 @@ async function handleTouchupClick() {
     }
 }
 
-// Add event listeners
-buttonSwitchCamera.addEventListener("mousedown", switchCamera);
+function openSettingsModal() {
+    apiKeyInput.value = localStorage.getItem('apiKey') || '';
+    apiEndpointInput.value = localStorage.getItem('apiEndpoint') || 'https://generativelanguage.googleapis.com';
+    settingsModal.style.display = 'flex';
+}
+
+function closeSettingsModal() {
+    settingsModal.style.display = 'none';
+}
+
+function saveSettings() {
+    localStorage.setItem('apiKey', apiKeyInput.value);
+    localStorage.setItem('apiEndpoint', apiEndpointInput.value);
+    closeSettingsModal();
+}
+ 
+ // Add event listeners
+ settingsButton.addEventListener("mousedown", openSettingsModal);
+ saveSettingsButton.addEventListener("mousedown", saveSettings);
+ cancelSettingsButton.addEventListener("mousedown", closeSettingsModal);
+ buttonSwitchCamera.addEventListener("mousedown", switchCamera);
 buttonCapture.addEventListener("mousedown", handleButtonCaptureClick);
 buttonProcess.addEventListener("mousedown", handleButtonProcessClick);
 saveButton.addEventListener("mousedown", handleSaveClick);

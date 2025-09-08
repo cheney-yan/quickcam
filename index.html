@@ -16,9 +16,23 @@
 		<canvas id="canvas"></canvas>
 	</div>
 	<div class="buttons">
-		<button id="buttonSwitchCamera" disabled>Switch Camera</button>
-		<button id="buttonCapture" disabled>Capture</button>
-		<button id="buttonProcess" disabled>Process</button>
+		<button id="buttonSwitchCamera">Switch Camera</button>
+		<button id="buttonCapture">Capture</button>
+		<button id="buttonProcess">Process</button>
+		<button id="settingsButton">⚙️</button>
+	</div>
+	<div id="settings-modal" style="display: none;">
+		<div class="modal-content">
+			<h2>Settings</h2>
+			<label for="apiKey">API Key:</label>
+			<input type="password" id="apiKey" placeholder="Enter your API Key">
+			<label for="apiEndpoint">API Endpoint:</label>
+			<input type="text" id="apiEndpoint" placeholder="https://generativelanguage.googleapis.com">
+			<div class="modal-buttons">
+				<button id="saveSettings">Save</button>
+				<button id="cancelSettings">Cancel</button>
+			</div>
+		</div>
 	</div>
 	<div id="processing-panel" style="display: none;">
 		<div id="prompt-input">
