@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>HTML5 and JavaScript Webcam PhotoBooth</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet"> 
 <link href="style.css" rel="stylesheet"> 
 <script defer src="script.js"></script>
@@ -16,9 +17,9 @@
 		<canvas id="canvas"></canvas>
 	</div>
 	<div class="buttons">
-		<button id="buttonSwitchCamera">Switch Camera</button>
-		<button id="buttonCapture">Capture</button>
-		<button id="buttonProcess">Process</button>
+		<button id="buttonSwitch">🔄</button>
+		<button id="buttonCapture">📸</button>
+		<button id="buttonProcess">🖐️</button>
 		<button id="settingsButton">⚙️</button>
 	</div>
 	<div id="settings-modal" style="display: none;">
@@ -38,14 +39,16 @@
 		<div id="prompt-input">
 			<textarea id="aiPrompt" placeholder="Describe how you want to enhance this image... (e.g., 'Make the colors more vibrant', 'Add a subtle blur background', 'Improve lighting')" rows="3">Enhance the image quality and make it look more professional</textarea>
 		</div>
-		<div id="loading-status" style="display: none;">
-			<div class="spinner"></div>
-			<p>Processing your image with AI...</p>
+		<div id="loading-overlay" style="display: none;">
+			<div class="spinner-container">
+				<div class="spinner"></div>
+				<p>Processing your image with AI...</p>
+			</div>
 		</div>
 		<div id="process-controls">
-			<button id="touchup">AI Touch Up</button>
-			<button id="save">Save</button>
-			<button id="cancel">Cancel</button>
+			<button id="touchup">✨</button>
+			<button id="save">💾</button>
+			<button id="cancel">❌</button>
 		</div>
 	</div>
 	<div id="savedImages"></div>

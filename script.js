@@ -1,12 +1,12 @@
 var buttonCapture = document.getElementById("buttonCapture");
 var buttonProcess = document.getElementById("buttonProcess");
-var buttonSwitchCamera = document.getElementById("buttonSwitchCamera");
+var buttonSwitchCamera = document.getElementById("buttonSwitch");
 var processingPanel = document.getElementById("processing-panel");
 var saveButton = document.getElementById("save");
 var touchupButton = document.getElementById("touchup");
 var cancelButton = document.getElementById("cancel");
 var promptInput = document.getElementById("aiPrompt");
-var loadingStatus = document.getElementById("loading-status");
+var loadingOverlay = document.getElementById("loading-overlay");
 var savedImages = document.getElementById("savedImages");
 var canvas = document.getElementById("canvas");
 var video = document.getElementById("video");
@@ -22,7 +22,7 @@ buttonCapture.disabled = true;
 buttonProcess.disabled = true;
 
 var context;
-var width = 450; //set width of the video and image
+var width;
 var height;
 
 // Camera switching variables
@@ -33,11 +33,8 @@ var currentStream = null;
 var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
 var isSafari = /Safari/.test(navigator.userAgent) && /Apple Computer, Inc/.test(navigator.vendor);
 
-video.width = width;
 
 var canvas = canvas;
-canvas.style.width = width + "px";
-canvas.width = width;
 
 context = canvas.getContext("2d");
 
@@ -58,7 +55,7 @@ async function enumerateCameras() {
             updateCameraButtonText();
         } else {
             buttonSwitchCamera.disabled = true;
-            buttonSwitchCamera.innerHTML = cameras.length === 0 ? 'No Cameras' : 'Switch Camera';
+            buttonSwitchCamera.innerHTML = cameras.length === 0 ? '🚫' : '🔄';
             buttonSwitchCamera.title = cameras.length === 0 ? 'No cameras detected' : 'Only one camera available';
         }
         
@@ -127,13 +124,6 @@ async function startWebcam(deviceId = null) {
         }
     }
 
-    function setHeight() {
-        var ratio = video.videoWidth / video.videoHeight;
-        height = width/ratio;
-        canvas.style.height = height + "px";
-        canvas.height = height;
-    }
-
 }
 
 // Update camera button text with current camera name
@@ -141,17 +131,22 @@ function updateCameraButtonText() {
     if (cameras.length > 1 && cameras[currentCameraIndex]) {
         const currentCamera = cameras[currentCameraIndex];
         const cameraName = currentCamera.label || `Camera ${currentCameraIndex + 1}`;
-        buttonSwitchCamera.innerHTML = `📷 ${cameraName}`;
+        buttonSwitchCamera.innerHTML = `🔄`;
         buttonSwitchCamera.title = `Click to switch between ${cameras.length} cameras. Currently using: ${cameraName}`;
+    } else {
+        buttonSwitchCamera.innerHTML = `🔄`;
     }
 }
 
 // Helper function to set video and canvas height
 function setHeight() {
-    var ratio = video.videoWidth / video.videoHeight;
-    height = width/ratio;
-    canvas.style.height = height + "px";
+    height = video.offsetHeight;
+    width = video.offsetWidth;
+    
+    canvas.width = width;
     canvas.height = height;
+    canvas.style.width = width + "px";
+    canvas.style.height = height + "px";
 }
 
 // Camera switching function
@@ -166,12 +161,11 @@ async function switchCamera() {
 function handleButtonCaptureClick() {
     if(canvas.style.display == "none" || canvas.style.display == ""){
         canvas.style.display = "block";
-        buttonCapture.innerHTML = "Retake";
+        buttonCapture.innerHTML = "↩️";
         
         setHeight();
-        context.drawImage(video, 0, 0, width, height);
+        context.drawImage(video, 0, 0, video.offsetWidth, video.offsetHeight);
 
-        buttonProcess.innerHTML = "Process";
         buttonProcess.disabled = false;
     } else {
         makeCaptureButton();
@@ -180,8 +174,7 @@ function handleButtonCaptureClick() {
 
 function makeCaptureButton() {
     canvas.style.display = "none";
-    buttonCapture.innerHTML = "Capture";
-    buttonProcess.innerHTML = "Process";
+    buttonCapture.innerHTML = "📸";
     buttonProcess.disabled = true;
     processingPanel.style.display = "none";
 }
@@ -287,15 +280,13 @@ async function enhanceImageWithAI(imageBase64, prompt) {
 // Show/Hide loading state
 function setLoadingState(isLoading) {
     if (isLoading) {
-        loadingStatus.style.display = 'block';
+        loadingOverlay.style.display = 'flex';
         touchupButton.disabled = true;
-        touchupButton.innerHTML = 'Processing...';
         saveButton.disabled = true;
         promptInput.disabled = true;
     } else {
-        loadingStatus.style.display = 'none';
+        loadingOverlay.style.display = 'none';
         touchupButton.disabled = false;
-        touchupButton.innerHTML = 'AI Touch Up';
         saveButton.disabled = false;
         promptInput.disabled = false;
     }
@@ -378,3 +369,6 @@ buttonProcess.addEventListener("mousedown", handleButtonProcessClick);
 saveButton.addEventListener("mousedown", handleSaveClick);
 cancelButton.addEventListener("mousedown", handleCancelClick);
 touchupButton.addEventListener("mousedown", handleTouchupClick);
+promptInput.addEventListener("focus", function() {
+    this.select();
+});
