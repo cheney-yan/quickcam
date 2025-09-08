@@ -84,3 +84,87 @@ button:disabled{
 #savedImages img {
     margin: 5px;
 }
+
+/* Processing panel styles */
+#processing-panel {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 15px;
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+    max-width: 450px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#filename-input {
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+#filename-input input {
+    padding: 15px 20px;
+    font-size: 18px;
+    border: 2px solid #ddd;
+    border-radius: 25px;
+    width: calc(100% - 40px);
+    max-width: 400px;
+    text-align: center;
+    font-family: 'Roboto', sans-serif;
+    background-color: white;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.05);
+    box-sizing: border-box;
+}
+
+#filename-input input:focus {
+    outline: none;
+    border-color: #49BEFF;
+    box-shadow: 0px 4px 12px rgba(73, 190, 255, 0.3);
+}
+
+#process-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+#process-controls button {
+    width: 120px;
+    height: 40px;
+    font-size: 10px;
+    margin: 5px;
+}
+
+#touchup {
+    background-color: #2196F3;
+    color: white;
+}
+
+#touchup:hover {
+    background-color: #1976D2;
+    box-shadow: 0px 15px 20px rgba(33, 150, 243, 0.4);
+    transform: translateY(-3px);
+}
+
+#save {
+    background-color: #4CAF50;
+    color: white;
+}
+
+#save:hover {
+    background-color: #45a049;
+    box-shadow: 0px 15px 20px rgba(76, 175, 80, 0.4);
+    transform: translateY(-3px);
+}
+
+#cancel {
+    background-color: #f44336;
+    color: white;
+}
+
+#cancel:hover {
+    background-color: #d32f2f;
+    box-shadow: 0px 15px 20px rgba(244, 67, 54, 0.4);
+    transform: translateY(-3px);
+}

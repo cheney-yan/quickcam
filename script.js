@@ -1,6 +1,11 @@
 var buttonCapture = document.getElementById("buttonCapture");
-var buttonSave = document.getElementById("buttonSave");
+var buttonProcess = document.getElementById("buttonProcess");
 var buttonSwitchCamera = document.getElementById("buttonSwitchCamera");
+var processingPanel = document.getElementById("processing-panel");
+var saveButton = document.getElementById("save");
+var touchupButton = document.getElementById("touchup");
+var cancelButton = document.getElementById("cancel");
+var filenameInput = document.getElementById("filename");
 var savedImages = document.getElementById("savedImages");
 var canvas = document.getElementById("canvas");
 var video = document.getElementById("video");
@@ -151,8 +156,8 @@ async function startWebcam(deviceId = null) {
             setHeight();
             context.drawImage(video, 0, 0, width, height);
 
-            buttonSave.innerHTML = "Save";
-            buttonSave.disabled = false;
+            buttonProcess.innerHTML = "Process";
+            buttonProcess.disabled = false;
         } else {
             makeCaptureButton();
         }
@@ -161,31 +166,58 @@ async function startWebcam(deviceId = null) {
     function makeCaptureButton() {
         canvas.style.display = "none";
         buttonCapture.innerHTML = "Capture";
-        buttonSave.innerHTML = "Save";
-        buttonSave.disabled = true;
+        buttonProcess.innerHTML = "Process";
+        buttonProcess.disabled = true;
+        processingPanel.style.display = "none";
     }
 
-    //add event listener and handle the save button
-    buttonSave.addEventListener("mousedown", handleButtonSaveClick);
+    //add event listener and handle the process button
+    buttonProcess.addEventListener("mousedown", handleButtonProcessClick);
     
-    function handleButtonSaveClick() {
-        var dataURL = canvas.toDataURL("image/jpg");
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", "save.php"); //change this to .php or .asp, depending on your server
-        xhr.onload = function() {
-            if (xhr.readyState == 4 ) {
-                if(xhr.status == 200) {
-                    var image = new Image();
-                    image.src = "images/" + xhr.responseText;
-                    savedImages.insertAdjacentElement('afterbegin', image);
-                    buttonSave.innerHTML = "Saved";
-                    buttonSave.disabled = true;
-                    makeCaptureButton();
-                }
-            }
-        };
-        var form = new FormData();
-        form.append("image", dataURL);
-        xhr.send(form);
+    function handleButtonProcessClick() {
+        // Show the processing panel
+        processingPanel.style.display = "block";
+        
+        // Set default filename with timestamp
+        const now = new Date();
+        const timestamp = now.toISOString().slice(0, 19).replace(/:/g, '-');
+        filenameInput.value = `photo-${timestamp}`;
+    }
+
+    //add event listener and handle the save button in processing panel
+    saveButton.addEventListener("mousedown", handleSaveClick);
+    
+    function handleSaveClick() {
+        const filename = filenameInput.value.trim() || 'photo';
+        
+        // Convert canvas to blob and trigger download
+        canvas.toBlob(function(blob) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${filename}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            // Hide processing panel after save
+            processingPanel.style.display = 'none';
+            makeCaptureButton();
+        }, 'image/png');
+    }
+
+    //add event listener and handle the cancel button
+    cancelButton.addEventListener("mousedown", handleCancelClick);
+    
+    function handleCancelClick() {
+        processingPanel.style.display = "none";
+    }
+
+    //add event listener and handle the touchup button
+    touchupButton.addEventListener("mousedown", handleTouchupClick);
+    
+    function handleTouchupClick() {
+        alert('Touch up functionality would go here (filters, adjustments, etc.)');
     }
 }

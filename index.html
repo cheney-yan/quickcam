@@ -18,7 +18,17 @@
 	<div class="buttons">
 		<button id="buttonSwitchCamera" disabled>Switch Camera</button>
 		<button id="buttonCapture" disabled>Capture</button>
-		<button id="buttonSave" disabled>Save</button>
+		<button id="buttonProcess" disabled>Process</button>
+	</div>
+	<div id="processing-panel" style="display: none;">
+		<div id="filename-input">
+			<input type="text" id="filename" placeholder="Enter filename..." value="photo">
+		</div>
+		<div id="process-controls">
+			<button id="touchup">Touch Up</button>
+			<button id="save">Save</button>
+			<button id="cancel">Cancel</button>
+		</div>
 	</div>
 	<div id="savedImages"></div>
 </div>
