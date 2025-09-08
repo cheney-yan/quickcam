@@ -253,8 +253,8 @@ async function enhanceImageWithAI(imageBase64, prompt) {
             const candidate = responseJson.candidates[0];
             if (candidate.content && candidate.content.parts) {
                 for (const part of candidate.content.parts) {
-                    if (part.inline_data && part.inline_data.data) {
-                        return part.inline_data.data;
+                    if (part.inlineData && part.inlineData.data) {
+                        return part.inlineData.data;
                     }
                 }
             }
@@ -315,7 +315,6 @@ async function handleTouchupClick() {
             // Hide loading state
             setLoadingState(false);
             
-            alert('Image enhanced successfully!');
         };
         
         enhancedImage.onerror = function() {
