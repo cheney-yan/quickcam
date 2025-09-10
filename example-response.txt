@@ -1,0 +1,172 @@
+# request
+
+## HEADERS
+URL
+https://vertex.yan.today/v1beta/models/gemini-2.5-flash-image-preview:streamGenerateContent?alt=sse
+HEADERS
+Accept:
+*/*
+Accept-Encoding:
+gzip, deflate, br, zstd
+Accept-Language:
+en-US
+Connection:
+keep-alive
+Content-Length:
+2189934
+content-type:
+application/json
+Host:
+vertex.yan.today
+sec-ch-ua:
+"Not)A;Brand";v="8", "Chromium";v="138"
+sec-ch-ua-mobile:
+?0
+sec-ch-ua-platform:
+"macOS"
+Sec-Fetch-Dest:
+empty
+Sec-Fetch-Mode:
+cors
+Sec-Fetch-Site:
+cross-site
+User-Agent:
+Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) CherryStudio/1.5.9 Chrome/138.0.7204.243 Electron/37.4.0 Safari/537.36
+x-goog-api-client:
+google-genai-sdk/1.0.1 gl-node/web
+x-goog-api-key:
+sk-fly-to-sydney
+
+## BODY:
+{
+  "contents": [
+    {
+      "parts": [
+        {
+          "text": "his"
+        }
+      ],
+      "role": "user"
+    },
+    {
+      "parts": [
+        {
+          "text": "Sure, I can create an image for \"his\" for you, but I need a little more context to make it a good one! Could you tell me what \"his\" refers to?\n\nFor example:\n*   \"His red car\"\n*   \"His dog playing in the park\"\n*   \"His new invention\"\n\nOnce you give me a more specific description, I'd be happy to generate an image for you!"
+        }
+      ],
+      "role": "model"
+    },
+    {
+      "parts": [
+        {
+          "text": "his red car"
+        }
+      ],
+      "role": "user"
+    },
+    {
+      "parts": [
+        {
+          "text": "Okay, here is an image of his red car! "
+        },
+        {
+          "inlineData": {
+            "data": "<png-base64>",
+            "mimeType": "image/png"
+          }
+        }
+      ],
+      "role": "model"
+    },
+    {
+      "parts": [
+        {
+          "text": "turn it to blue"
+        }
+      ],
+      "role": "user"
+    }
+  ],
+  "safetySettings": [
+    {
+      "category": "HARM_CATEGORY_HATE_SPEECH",
+      "threshold": "OFF"
+    },
+    {
+      "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+      "threshold": "OFF"
+    },
+    {
+      "category": "HARM_CATEGORY_HARASSMENT",
+      "threshold": "OFF"
+    },
+    {
+      "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+      "threshold": "OFF"
+    },
+    {
+      "category": "HARM_CATEGORY_CIVIC_INTEGRITY",
+      "threshold": "BLOCK_NONE"
+    }
+  ],
+  "tools": [],
+  "generationConfig": {
+    "temperature": 1,
+    "topP": 1,
+    "responseModalities": [
+      "TEXT",
+      "IMAGE"
+    ]
+  }
+}
+
+
+# responseId
+
+## HEADER
+STATUS: 200 OK
+HEADERS
+alt-svc:
+h3=":443"; ma=86400
+cf-cache-status:
+DYNAMIC
+CF-RAY:
+97cbd81efcccc17f-SYD
+Connection:
+keep-alive
+content-disposition:
+attachment
+Content-Length:
+2187172
+Content-Type:
+text/event-stream
+Date:
+Wed, 10 Sep 2025 03:30:10 GMT
+NEL:
+{"success_fraction":0,"report_to":"cf-nel","max_age":604800}
+Report-To:
+{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v4?s=mH5x9XSpOhRBfelkWlSpu6R0%2BokBbkhIf5OZ9ipK6zTR1r8sFIx6rAmynFUHn6BPdkmVZOoqIbajau4uBe0O3UtAVOY1WHWXYeTYdHV3TnLDfCOCVHyybNBZy0SE5dvNlmEP"}],"group":"cf-nel","max_age":604800}
+Server:
+cloudflare
+server-timing:
+cfL4;desc="?proto=TCP&rtt=6736&min_rtt=4333&rtt_var=525&sent=2651&recv=2433&lost=0&retrans=1&sent_bytes=2210608&recv_bytes=2196844&delivery_rate=99530737&cwnd=1162&unsent_bytes=0&cid=b4d027e02d2fb40e&ts=39612&x=0"
+vary:
+Origin, X-Origin, Referer
+x-content-type-options:
+nosniff
+x-frame-options:
+SAMEORIGIN
+x-xss-protection:
+0
+
+## BODY
+
+
+data: {"candidates": [{"content": {"role": "model","parts": [{"text": "Here"}]},"avgLogprobs": -0.64959895610809326}],"usageMetadata": {"trafficType": "ON_DEMAND"},"modelVersion": "gemini-2.5-flash-image-preview","createTime": "2025-09-10T03:30:02.361227Z","responseId": "uvDAaIuGFtTi694P4YOw6Ac"}
+
+data: {"candidates": [{"content": {"role": "model","parts": [{"text": " is the car,"}]},"avgLogprobs": -1.3219050168991089}],"usageMetadata": {"trafficType": "ON_DEMAND"},"modelVersion": "gemini-2.5-flash-image-preview","createTime": "2025-09-10T03:30:02.361227Z","responseId": "uvDAaIuGFtTi694P4YOw6Ac"}
+
+data: {"candidates": [{"content": {"role": "model","parts": [{"text": " now in blue! "}]},"avgLogprobs": -0.025485944747924805}],"usageMetadata": {"trafficType": "ON_DEMAND"},"modelVersion": "gemini-2.5-flash-image-preview","createTime": "2025-09-10T03:30:02.361227Z","responseId": "uvDAaIuGFtTi694P4YOw6Ac"}
+
+data: {"candidates": [{"content": {"role": "model","parts": [{"inlineData": {"mimeType": "image/png","data": "<png-base64>"}}]},"finishReason": "STOP"}],"usageMetadata": {"promptTokenCount": 1402,"candidatesTokenCount": 1300,"totalTokenCount": 2702,"trafficType": "ON_DEMAND","promptTokensDetails": [{"modality": "TEXT","tokenCount": 112},{"modality": "IMAGE","tokenCount": 1290}],"candidatesTokensDetails": [{"modality": "IMAGE","tokenCount": 1290},{"modality": "TEXT","tokenCount": 10}]},"modelVersion": "gemini-2.5-flash-image-preview","createTime": "2025-09-10T03:30:02.361227Z","responseId": "uvDAaIuGFtTi694P4YOw6Ac"}
+

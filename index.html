@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>HTML5 and JavaScript Webcam PhotoBooth</title>
+<title>HTML5 和 JavaScript 网络摄像头照相亭</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet"> 
 <link href="style.css" rel="stylesheet"> 
@@ -17,38 +17,53 @@
 		<canvas id="canvas"></canvas>
 	</div>
 	<div class="buttons">
-		<button id="buttonSwitch">🔄</button>
-		<button id="buttonCapture">📸</button>
-		<button id="buttonProcess">🖐️</button>
-		<button id="settingsButton">⚙️</button>
+		<button id="buttonSwitch">镜</button>
+		<button id="buttonCapture">拍</button>
+		<button id="buttonProcess">变</button>
+		<button id="settingsButton">设</button>
+		<button id="helpButton">问</button>
 	</div>
 	<div id="settings-modal" style="display: none;">
 		<div class="modal-content">
-			<h2>Settings</h2>
-			<label for="apiKey">API Key:</label>
-			<input type="password" id="apiKey" placeholder="Enter your API Key">
-			<label for="apiEndpoint">API Endpoint:</label>
-			<input type="text" id="apiEndpoint" placeholder="https://generativelanguage.googleapis.com">
+			<h2>设置</h2>
+			<label for="apiKey">密码:</label>
+			<input type="password" id="apiKey" placeholder="请输入您的密码">
 			<div class="modal-buttons">
-				<button id="saveSettings">Save</button>
-				<button id="cancelSettings">Cancel</button>
+				<button id="saveSettings">存</button>
+				<button id="cancelSettings">消</button>
+			</div>
+		</div>
+	</div>
+	<div id="help-modal" style="display: none;">
+		<div class="modal-content">
+			<h2>如何使用</h2>
+			<p>1. 允许浏览器访问您的摄像头。</p>
+			<p>2. 点击 “拍” 按钮拍照。</p>
+			<p>3. 点击 “变” 按钮打开处理面板。</p>
+			<p>4. 在文本框中输入您想如何增强照片的描述。</p>
+			<p>5. 点击 “变” 按钮使用 AI 增强您的照片。</p>
+			<p>6. 点击 “存” 按钮保存您的照片。</p>
+			<p>7. 点击 “镜” 按钮切换摄像头。</p>
+			<p>8. 点击 “设” 按钮设置您的密码。如果没有密码，给作者发个消息</p>
+			<div class="modal-buttons">
+				<button id="closeHelp">关</button>
 			</div>
 		</div>
 	</div>
 	<div id="processing-panel" style="display: none;">
 		<div id="prompt-input">
-			<textarea id="aiPrompt" placeholder="Describe how you want to enhance this image... (e.g., 'Make the colors more vibrant', 'Add a subtle blur background', 'Improve lighting')" rows="3">Enhance the image quality and make it look more professional</textarea>
+			<textarea id="aiPrompt" placeholder="在这里许个愿，然后点击“变“，看看效果。" rows="3"></textarea>
 		</div>
 		<div id="loading-overlay" style="display: none;">
 			<div class="spinner-container">
 				<div class="spinner"></div>
-				<p>Processing your image with AI...</p>
+				<p>正在用 AI 处理您的图像...</p>
 			</div>
 		</div>
 		<div id="process-controls">
-			<button id="touchup">✨</button>
-			<button id="save">💾</button>
-			<button id="cancel">❌</button>
+			<button id="touchup">变</button>
+			<button id="save">存</button>
+			<button id="cancel">消</button>
 		</div>
 	</div>
 	<div id="savedImages"></div>

@@ -20,6 +20,23 @@ body {
 	border-radius: 15px;
 	box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
 	position: relative;
+	transition: border-color 0.3s ease;
+}
+
+.holder.live-view {
+	animation: pulse-border 2s ease-in-out infinite;
+}
+
+@keyframes pulse-border {
+  0% {
+    border-color: #49BEFF;
+  }
+  50% {
+    border-color: #fff;
+  }
+  100% {
+    border-color: #49BEFF;
+  }
 }
 
 #video{
@@ -43,21 +60,24 @@ body {
 }
 	
 button{
-	width: 140px;
-	height: 45px;
-	font-size: 11px;
-	text-transform: uppercase;
-	letter-spacing: 2.5px;
+	width: 60px;
+	height: 60px;
+	font-size: 24px;
 	font-weight: 500;
 	color: #000;
 	background-color: #fff;
 	border: none;
-	border-radius: 45px;
+	border-radius: 50%;
 	box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
 	transition: all 0.3s ease 0s;
 	cursor: pointer;
 	outline: none;
 	margin: 0 10px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	vertical-align: middle;
 }
 
 button:not([disabled]):hover{
@@ -66,10 +86,19 @@ button:not([disabled]):hover{
 	color: #fff;
 	transform: translateY(-5px);
 }
+
+button:disabled:hover {
+    transform: none;
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+    background-color: #f5f5f5;
+    color: #ccc;
+}
 	
 button:disabled{
 	color: #ccc;
-    background-color: #f5f5f5;
+	   background-color: #f5f5f5;
+	   opacity: 0.4;
+	   cursor: not-allowed;
 }
 	
 #savedImages{
@@ -198,32 +227,14 @@ button:disabled{
     color: #000;
 }
 
-#touchup:hover {
-    background-color: #1976D2;
-    box-shadow: 0px 15px 20px rgba(33, 150, 243, 0.4);
-    transform: translateY(-3px);
-}
-
 #save {
-    background-color: #fff;
-    color: #000;
-}
-
-#save:hover {
-    background-color: #45a049;
-    box-shadow: 0px 15px 20px rgba(76, 175, 80, 0.4);
-    transform: translateY(-3px);
+	background-color: #fff;
+	color: #000;
 }
 
 #cancel {
-    background-color: #fff;
-    color: #000;
-}
-
-#cancel:hover {
-    background-color: #d32f2f;
-    box-shadow: 0px 15px 20px rgba(244, 67, 54, 0.4);
-    transform: translateY(-3px);
+	background-color: #fff;
+	color: #000;
 }
 /* Settings Button */
 #settingsButton {
@@ -234,10 +245,20 @@ button:disabled{
     line-height: 45px;
     padding: 0;
     margin-left: 10px;
-}
-
-/* Settings Modal */
-#settings-modal {
+   }
+   
+   #helpButton {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    font-size: 20px;
+    line-height: 45px;
+    padding: 0;
+    margin-left: 10px;
+   }
+   
+   /* Settings Modal */
+   #settings-modal, #help-modal {
     position: fixed;
     z-index: 100;
     left: 0;
@@ -282,9 +303,9 @@ button:disabled{
 .modal-buttons {
     margin-top: 20px;
     text-align: right;
-}
-
-@media (max-width: 768px) {
+   }
+   
+   @media (max-width: 768px) {
     .buttons {
         display: flex;
         flex-direction: row;
@@ -292,19 +313,11 @@ button:disabled{
         align-items: center;
         gap: 10px;
     }
-
+   
     button {
-        width: 60px;
-        height: 60px;
-        font-size: 24px;
-        padding: 0;
-        margin: 0 5px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    	margin: 0 5px;
     }
-
+   
     #processing-panel {
         width: 90%;
         padding: 10px;

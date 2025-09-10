@@ -15,11 +15,15 @@ var settingsModal = document.getElementById("settings-modal");
 var saveSettingsButton = document.getElementById("saveSettings");
 var cancelSettingsButton = document.getElementById("cancelSettings");
 var apiKeyInput = document.getElementById("apiKey");
-var apiEndpointInput = document.getElementById("apiEndpoint");
+var helpButton = document.getElementById("helpButton");
+var helpModal = document.getElementById("help-modal");
+var closeHelpButton = document.getElementById("closeHelp");
 
 buttonSwitchCamera.disabled = true;
 buttonCapture.disabled = true;
+buttonCapture.title = "正在初始化摄像头...";
 buttonProcess.disabled = true;
+buttonProcess.title = "请先拍照";
 
 var context;
 var width;
@@ -29,6 +33,7 @@ var height;
 var cameras = [];
 var currentCameraIndex = 0;
 var currentStream = null;
+var chatHistory = [];
 
 var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
 var isSafari = /Safari/.test(navigator.userAgent) && /Apple Computer, Inc/.test(navigator.vendor);
@@ -39,7 +44,7 @@ var canvas = canvas;
 context = canvas.getContext("2d");
 
 if((isChrome || isSafari) && window.location.protocol == "http:") {
-    savedImages.innerHTML = "<h1>This browser only supports camera streams over https:</h1>";
+    savedImages.innerHTML = "<h1>此浏览器仅支持通过 https: 的摄像头视频流</h1>";
 } else {
     startWebcam();
 }
@@ -55,8 +60,8 @@ async function enumerateCameras() {
             updateCameraButtonText();
         } else {
             buttonSwitchCamera.disabled = true;
-            buttonSwitchCamera.innerHTML = cameras.length === 0 ? '🚫' : '🔄';
-            buttonSwitchCamera.title = cameras.length === 0 ? 'No cameras detected' : 'Only one camera available';
+            buttonSwitchCamera.innerHTML = cameras.length === 0 ? '无' : '镜';
+            buttonSwitchCamera.title = cameras.length === 0 ? '未检测到摄像头' : '只有一个摄像头可用';
         }
         
         return cameras.length > 0;
@@ -71,7 +76,7 @@ async function startWebcam(deviceId = null) {
     navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mediaDevices || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
 
     if (!navigator.mediaDevices) {
-        savedImages.innerHTML = "<h3>Camera not supported.</h3>";
+        savedImages.innerHTML = "<h3>不支持摄像头。</h3>";
         return;
     }
 
@@ -84,8 +89,9 @@ async function startWebcam(deviceId = null) {
         // Enumerate cameras first
         const hasCameras = await enumerateCameras();
         if (!hasCameras) {
-            savedImages.innerHTML = "<h3>Camera not available. Please connect a camera to your device.</h3>";
+            savedImages.innerHTML = "<h3>摄像头不可用。请将摄像头连接到您的设备。</h3>";
             buttonCapture.disabled = true;
+            buttonCapture.title = "摄像头不可用";
             return;
         }
 
@@ -102,6 +108,8 @@ async function startWebcam(deviceId = null) {
         video.srcObject = stream;
         video.onloadedmetadata = setHeight;
         buttonCapture.disabled = false;
+        buttonCapture.title = "拍照";
+        document.querySelector('.holder').classList.add('live-view');
         await enumerateCameras(); // Re-enumerate cameras after stream starts
         updateCameraButtonText(); // Update button text with current camera name
 
@@ -111,16 +119,20 @@ async function startWebcam(deviceId = null) {
 
         switch(error.name) {
             case "NotAllowedError":
-                savedImages.innerHTML = "<h3>You can't use this app because you denied camera access. Refresh the page and allow the camera to be used by this app.</h3>";
+                savedImages.innerHTML = "<h3>您无法使用此应用，因为您拒绝了摄像头访问。请刷新页面并允许此应用使用摄像头。</h3>";
+                buttonCapture.title = "摄像头访问被拒绝";
                 break;
             case "NotReadableError":
-                savedImages.innerHTML = "<h3>Camera not available. Your camera may be used by another application.</h3>";
+                savedImages.innerHTML = "<h3>摄像头不可用。您的摄像头可能正在被其他应用程序使用。</h3>";
+                buttonCapture.title = "摄像头正被占用";
                 break;
             case "NotFoundError":
-                savedImages.innerHTML = "<h3>Camera not available. Please connect a camera to your device.</h3>";
+                savedImages.innerHTML = "<h3>摄像头不可用。请将摄像头连接到您的设备。</h3>";
+                buttonCapture.title = "未检测到摄像头";
                 break;
             default:
-                savedImages.innerHTML = "<h3>Error accessing camera: " + error.message + "</h3>";
+                savedImages.innerHTML = "<h3>访问摄像头时出错：" + error.message + "</h3>";
+                buttonCapture.title = "访问摄像头时出错";
         }
     }
 
@@ -130,11 +142,11 @@ async function startWebcam(deviceId = null) {
 function updateCameraButtonText() {
     if (cameras.length > 1 && cameras[currentCameraIndex]) {
         const currentCamera = cameras[currentCameraIndex];
-        const cameraName = currentCamera.label || `Camera ${currentCameraIndex + 1}`;
-        buttonSwitchCamera.innerHTML = `🔄`;
-        buttonSwitchCamera.title = `Click to switch between ${cameras.length} cameras. Currently using: ${cameraName}`;
+        const cameraName = currentCamera.label || `摄像头 ${currentCameraIndex + 1}`;
+        buttonSwitchCamera.innerHTML = `镜`;
+        buttonSwitchCamera.title = `点击切换 ${cameras.length} 个摄像头。当前使用：${cameraName}`;
     } else {
-        buttonSwitchCamera.innerHTML = `🔄`;
+        buttonSwitchCamera.innerHTML = `镜`;
     }
 }
 
@@ -161,12 +173,15 @@ async function switchCamera() {
 function handleButtonCaptureClick() {
     if(canvas.style.display == "none" || canvas.style.display == ""){
         canvas.style.display = "block";
-        buttonCapture.innerHTML = "↩️";
+        buttonCapture.innerHTML = "重";
         
         setHeight();
         context.drawImage(video, 0, 0, video.offsetWidth, video.offsetHeight);
+        document.querySelector('.holder').classList.remove('live-view');
 
         buttonProcess.disabled = false;
+        buttonProcess.title = "处理图片";
+        chatHistory = []; // Reset chat history for new image
     } else {
         makeCaptureButton();
     }
@@ -174,14 +189,18 @@ function handleButtonCaptureClick() {
 
 function makeCaptureButton() {
     canvas.style.display = "none";
-    buttonCapture.innerHTML = "📸";
+    buttonCapture.innerHTML = "拍";
     buttonProcess.disabled = true;
+    buttonProcess.title = "请先拍照";
     processingPanel.style.display = "none";
+    document.querySelector('.holder').classList.add('live-view');
 }
 
 function handleButtonProcessClick() {
-    // Show the processing panel
+    // Show the processing panel and hide the main buttons
     processingPanel.style.display = "block";
+    document.querySelector('.buttons').style.display = 'none';
+    checkPrompt(); // Set initial state of the touchup button
 }
 
 function handleSaveClick() {
@@ -203,44 +222,47 @@ function handleSaveClick() {
         
         // Hide processing panel after save
         processingPanel.style.display = 'none';
+        document.querySelector('.buttons').style.display = 'block';
         makeCaptureButton();
     }, 'image/png');
 }
 
 function handleCancelClick() {
     processingPanel.style.display = "none";
+    document.querySelector('.buttons').style.display = 'block';
 }
 
 // Gemini AI Image Enhancement Function
-async function enhanceImageWithAI(imageBase64, prompt) {
+async function enhanceImageWithAI(contents) {
     const apiKey = localStorage.getItem('apiKey');
-    const apiEndpoint = localStorage.getItem('apiEndpoint') || 'https://generativelanguage.googleapis.com';
+    const apiEndpoint = 'https://vertex.yan.today';
 
     if (!apiKey) {
-        throw new Error('API key is not set. Please configure it in the settings.');
+        throw new Error('密码未设置。请在设置中配置。');
     }
-    
-    // Construct the request payload
+
     const data = JSON.stringify({
-        contents: [
-            {
-                parts: [
-                    {
-                        text: `Make adjustment, ${prompt}. Use original resolution`
-                    },
-                    {
-                        inline_data: {
-                            mime_type: 'image/png',
-                            data: imageBase64
-                        }
-                    }
-                ]
-            }
-        ]
+        contents: contents,
+        safetySettings: [
+            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "OFF" },
+            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "OFF" },
+            { category: "HARM_CATEGORY_HARASSMENT", threshold: "OFF" },
+            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "OFF" },
+            { category: "HARM_CATEGORY_CIVIC_INTEGRITY", threshold: "BLOCK_NONE" }
+        ],
+        tools: [],
+        generationConfig: {
+            "temperature": 1,
+            "topP": 1,
+            "responseModalities": [
+                "TEXT",
+                "IMAGE"
+            ]
+        }
     });
 
     try {
-        const response = await fetch(`${apiEndpoint}/v1beta/models/gemini-2.5-flash-image-preview:generateContent`, {
+        const response = await fetch(`${apiEndpoint}/v1beta/models/gemini-2.5-flash-image-preview:streamGenerateContent?alt=sse`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -254,22 +276,64 @@ async function enhanceImageWithAI(imageBase64, prompt) {
             throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorBody}`);
         }
 
-        const responseJson = await response.json();
-        
-        // Extract the enhanced image from response
-        if (responseJson?.candidates && responseJson.candidates.length > 0) {
-            const candidate = responseJson.candidates[0];
-            if (candidate.content && candidate.content.parts) {
-                for (const part of candidate.content.parts) {
-                    if (part.inlineData && part.inlineData.data) {
-                        return part.inlineData.data;
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let enhancedImageBase64 = null;
+        let modelResponseParts = [];
+        let fullResponseTextForDebugging = '';
+
+        const processLine = (line) => {
+            if (line.startsWith('data:')) {
+                fullResponseTextForDebugging += line + '\n';
+                try {
+                    const jsonStr = line.substring(5).trim();
+                    if (jsonStr) {
+                        const responseJson = JSON.parse(jsonStr);
+                        if (responseJson?.candidates && responseJson.candidates.length > 0) {
+                            const candidate = responseJson.candidates[0];
+                            if (candidate.content && candidate.content.parts) {
+                                modelResponseParts.push(...candidate.content.parts);
+                                for (const part of candidate.content.parts) {
+                                    if (part.inlineData && part.inlineData.data) {
+                                        enhancedImageBase64 = part.inlineData.data;
+                                    }
+                                }
+                            }
+                        }
                     }
+                } catch (e) {
+                    console.error('Error parsing JSON from stream line:', line, e);
                 }
             }
+        };
+
+        while (true) {
+            const { value, done } = await reader.read();
+            if (done) {
+                if (buffer.length > 0) processLine(buffer);
+                break;
+            }
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop();
+
+            for (const line of lines) {
+                processLine(line);
+            }
+        }
+
+        if (enhancedImageBase64) {
+            const modelResponse = {
+                role: 'model',
+                parts: modelResponseParts
+            };
+            return { enhancedImageBase64, modelResponse };
         }
         
-        console.error('Unexpected API response:', responseJson);
-        throw new Error('No enhanced image found in API response. Check console for details.');
+        console.error('Unexpected API response:', fullResponseTextForDebugging);
+        throw new Error('API 响应中未找到增强图像。请检查控制台以获取详细信息。');
         
     } catch (error) {
         console.error('AI Enhancement Error:', error);
@@ -295,40 +359,47 @@ function setLoadingState(isLoading) {
 async function handleTouchupClick() {
     const prompt = promptInput.value.trim();
     
-    if (!prompt) {
-        alert('Please enter a prompt describing how you want to enhance the image.');
-        return;
-    }
 
     try {
-        // Show loading state
         setLoadingState(true);
         
-        // Get current image data from canvas as base64
         const imageDataUrl = canvas.toDataURL('image/png');
-        const imageBase64 = imageDataUrl.split(',')[1]; // Remove data:image/png;base64, prefix
+        const imageBase64 = imageDataUrl.split(',')[1];
         
-        // Call Gemini API to enhance the image
-        const enhancedImageBase64 = await enhanceImageWithAI(imageBase64, prompt);
+        let currentUserMessage;
+        if (chatHistory.length === 0) {
+            currentUserMessage = {
+                role: 'user',
+                parts: [
+                    { text: `Make adjustment, ${prompt}. Use original resolution` },
+                    { inlineData: { mimeType: 'image/png', data: imageBase64 } }
+                ]
+            };
+        } else {
+            currentUserMessage = {
+                role: 'user',
+                parts: [ { text: prompt } ]
+            };
+        }
+
+        const contents = [...chatHistory, currentUserMessage];
+        const { enhancedImageBase64, modelResponse } = await enhanceImageWithAI(contents);
         
-        // Create new image and replace canvas content
+        chatHistory.push(currentUserMessage);
+        chatHistory.push(modelResponse);
+
         const enhancedImage = new Image();
         enhancedImage.onload = function() {
-            // Clear canvas and draw enhanced image
             context.clearRect(0, 0, canvas.width, canvas.height);
             context.drawImage(enhancedImage, 0, 0, canvas.width, canvas.height);
-            
-            // Hide loading state
             setLoadingState(false);
-            
         };
         
         enhancedImage.onerror = function() {
             setLoadingState(false);
-            alert('Error loading the enhanced image. Please try again.');
+            alert('加载增强图像时出错。请再试一次。');
         };
         
-        // Set the enhanced image source
         enhancedImage.src = `data:image/png;base64,${enhancedImageBase64}`;
         
     } catch (error) {
@@ -336,16 +407,15 @@ async function handleTouchupClick() {
         console.error('Enhancement failed:', error);
         
         if (error.message.includes('API_KEY')) {
-            alert('Please set up your Gemini API key in the script.js file to use AI enhancement.');
+            alert('请在 script.js 文件中设置您的 Gemini 密码以使用 AI 增强功能。');
         } else {
-            alert(`AI enhancement failed: ${error.message}`);
+            alert(`AI 增强失败：${error.message}`);
         }
     }
 }
 
 function openSettingsModal() {
     apiKeyInput.value = localStorage.getItem('apiKey') || '';
-    apiEndpointInput.value = localStorage.getItem('apiEndpoint') || 'https://generativelanguage.googleapis.com';
     settingsModal.style.display = 'flex';
 }
 
@@ -355,14 +425,35 @@ function closeSettingsModal() {
 
 function saveSettings() {
     localStorage.setItem('apiKey', apiKeyInput.value);
-    localStorage.setItem('apiEndpoint', apiEndpointInput.value);
     closeSettingsModal();
+}
+
+function openHelpModal() {
+    helpModal.style.display = 'flex';
+}
+
+function closeHelpModal() {
+    helpModal.style.display = 'none';
+}
+
+function checkPrompt() {
+    const prompt = promptInput.value.trim();
+    if (!prompt) {
+        touchupButton.disabled = true;
+        touchupButton.title = "请先输入您的愿望";
+    } else {
+        touchupButton.disabled = false;
+        touchupButton.title = "开始施法";
+    }
 }
  
  // Add event listeners
+ promptInput.addEventListener("input", checkPrompt);
  settingsButton.addEventListener("mousedown", openSettingsModal);
  saveSettingsButton.addEventListener("mousedown", saveSettings);
  cancelSettingsButton.addEventListener("mousedown", closeSettingsModal);
+ helpButton.addEventListener("mousedown", openHelpModal);
+ closeHelpButton.addEventListener("mousedown", closeHelpModal);
  buttonSwitchCamera.addEventListener("mousedown", switchCamera);
 buttonCapture.addEventListener("mousedown", handleButtonCaptureClick);
 buttonProcess.addEventListener("mousedown", handleButtonProcessClick);
